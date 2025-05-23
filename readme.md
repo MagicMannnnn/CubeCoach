@@ -9,8 +9,6 @@ CubeCoach is a lightweight Windows application that helps you improve your Rubik
 ## 🚀 Features
 
 - ✨ Visual cube training interface
-- ⏱️ Timer and stats tracking
-- 🧩 Beginner and advanced mode
 - 💾 Lightweight and portable
 
 ---
