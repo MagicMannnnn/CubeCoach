@@ -2,7 +2,7 @@
 
 CubeCoach is a lightweight Windows application that helps you improve your Rubik's Cube solving skills through visualization, feedback, and practice tools. Built with C++ and OpenGL.
 
-![CubeCoach Screenshot](./docs/screenshot.png) <!-- Replace with actual image path -->
+![CubeCoach Screenshot](screenshot.png) <!-- Replace with actual image path -->
 
 ---
 
