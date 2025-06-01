@@ -1,5 +1,3 @@
-#https://github.com/meemknight/cmakeSetup
-
 cmake_minimum_required(VERSION 3.1)
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>") #we want to use the static runtime
@@ -25,12 +23,22 @@ add_subdirectory(thirdparty/glm)				#math
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 
-add_executable("${CMAKE_PROJECT_NAME}")
+if(WIN32)
+    add_executable("${CMAKE_PROJECT_NAME}" ${MY_SOURCES} "${CMAKE_SOURCE_DIR}/app_icon.rc")
+else()
+    add_executable("${CMAKE_PROJECT_NAME}" ${MY_SOURCES})
+endif()
+
+
+
 
 set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY CXX_STANDARD 17)
 
-target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/") # This is useful to get an ASSETS_PATH in your IDE during development but you should comment this if you compile a release version and uncomment the next line
+#target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/") # This is useful to get an ASSETS_PATH in your IDE during development but you should comment this if you compile a release version and uncomment the next line
 target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RESOURCES_PATH="./resources/") # Uncomment this line to setup the ASSETS_PATH macro to the final assets directory when you share the game
+
+#set(DOCUMENTS_PATH "$ENV{USERPROFILE}/Documents")
+#target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RESOURCES_PATH="/${DOCUMENTS_PATH}/CubeCoach/")
 
 
 target_sources("${CMAKE_PROJECT_NAME}" PRIVATE ${MY_SOURCES} )
@@ -65,32 +73,26 @@ target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Threads::Threads)
 
 
 
-# Set the name and version of your project for CPack
+# Package config
 set(CPACK_PACKAGE_NAME "CubeCoach")
 set(CPACK_PACKAGE_VERSION "0.1.0")
-
-# Set the output directory for the package
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "CubeCoach")             # <<<< REMOVE version from path
+set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64/")              # <<<< Add trailing slash
 set(CPACK_OUTPUT_FILE_PREFIX "${CMAKE_BINARY_DIR}/release")
-
-# Specify the generator to use (NSIS for Windows installer)
 set(CPACK_GENERATOR "NSIS")
 
-# Specify the path to the NSIS script (using forward slashes)
+# Optional: NSIS UI and custom script
+set(CPACK_NSIS_DISPLAY_NAME "CubeCoach Installer")
+set(CPACK_NSIS_PACKAGE_NAME "CubeCoach")
+set(CPACK_NSIS_EXECUTABLES_DIRECTORY "bin")
 set(CPACK_NSIS_SCRIPT "${CMAKE_SOURCE_DIR}/CubeCoachInstaller.nsi")
 
-# Set installer configurations
-set(CPACK_NSIS_PACKAGE_NAME "CubeCoach")
-set(CPACK_NSIS_DISPLAY_NAME "CubeCoach Installer")
-set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64\\CubeCoach")  # Use forward slashes for paths
-set(CPACK_NSIS_EXECUTABLES_DIRECTORY "bin")  # Directory for executables
-
-# Install files (executables and resources)
+# Install rules
 install(TARGETS "${CMAKE_PROJECT_NAME}" RUNTIME DESTINATION bin)
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/resources/" DESTINATION resources)
+install(FILES "${CMAKE_SOURCE_DIR}/LICENSE.txt" DESTINATION resources)
 
-# Install the LICENSE.txt file
-install(FILES "${CMAKE_SOURCE_DIR}/LICENSE.txt" DESTINATION "resources")
-
-# Include CPack module to generate the installer
 include(CPack)
+
+
 

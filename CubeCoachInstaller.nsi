@@ -1,35 +1,46 @@
 !include "MUI2.nsh"
 
-!define APPNAME "CubeCoach"
-!define DESCRIPTION "Rubik's Cube Trainer"
-!define VERSION "0.1.0"
-!define LICENSE_FILE "resources\\LICENSE.txt"  ; Use single backslashes for NSIS
-
-Name "${APPNAME}"
+# Installer information
+Name "CubeCoach"
 OutFile "CubeCoachInstaller.exe"
-InstallDir "$PROGRAMFILES64\\${APPNAME}"
+InstallDir "$PROGRAMFILES64\\CubeCoach"
 RequestExecutionLevel admin
 
 # Pages
-!insertmacro MUI_PAGE_LICENSE "${LICENSE_FILE}"
+!insertmacro MUI_PAGE_LICENSE "LICENSE.txt"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
 
-# Languages (optional)
+# Uninstaller pages
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+
+# Language
 !insertmacro MUI_LANGUAGE "English"
 
+
+
+# Files to install
 Section "Install"
+  SetOutPath "$INSTDIR\bin"
+  File "out\build\x64-release\CubeCoach.exe"
 
-    # Install binaries to bin folder
-    SetOutPath "$INSTDIR\\bin"
-    File /r "bin\\*.*"
+  SetOutPath "$INSTDIR\resources"
+  File /r "resources\*.*"
 
-    # Install resources folder
-    SetOutPath "$INSTDIR\\resources"
-    File /r "resources\\*.*"
+  # Create a start menu shortcut
+  CreateDirectory "$SMPROGRAMS\\CubeCoach"
+  CreateShortCut "$SMPROGRAMS\\CubeCoach\\CubeCoach.lnk" "$INSTDIR\\bin\\CubeCoach.exe"
 
-    # Create Start Menu folder and shortcut
-    CreateDirectory "$SMPROGRAMS\\${APPNAME}"
-    CreateShortCut "$SMPROGRAMS\\${APPNAME}\\${APPNAME}.lnk" "$INSTDIR\\bin\\CubeCoach.exe"
+SectionEnd
 
+# Uninstall section
+Section "Uninstall"
+  Delete "$INSTDIR\bin\CubeCoach.exe"
+  Delete "$DESKTOP\CubeCoach.lnk"
+  Delete "$SMPROGRAMS\CubeCoach\CubeCoach.lnk"
+  RMDir /r "$INSTDIR\resources"
+  RMDir "$SMPROGRAMS\CubeCoach"
+  RMDir /r "$INSTDIR"
 SectionEnd

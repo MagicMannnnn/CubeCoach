@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <app_input.hpp>
 #include <iostream>
+#include <texture.hpp>
 
 
 namespace Setup {
@@ -30,7 +31,7 @@ namespace Setup {
         glfwSetScrollCallback(Global::window, Global::scroll_callback);
         glfwSetMouseButtonCallback(Global::window, Global::mouse_button_callback);
 
-
+        setupIcon();
 
 
         // glad: load all OpenGL function pointers

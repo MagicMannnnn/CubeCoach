@@ -2,6 +2,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image/stb_image.h>
+#include <app_input.hpp>
 
 
 struct Texture {
@@ -20,3 +21,24 @@ struct Texture {
     Texture(const std::string& colorType, float red, float green, float blue, float alpha)
         : id(0), type(colorType), path(""), r(red), g(green), b(blue), a(alpha) {}
 };
+
+
+void setupIcon() {
+    // Load icon image using stb_image
+    int iconWidth, iconHeight, iconChannels;
+    unsigned char* iconPixels = stbi_load(RESOURCES_PATH"icon.png", &iconWidth, &iconHeight, &iconChannels, 4); // force RGBA
+
+    if (iconPixels)
+    {
+        GLFWimage images[1];
+        images[0].width = iconWidth;
+        images[0].height = iconHeight;
+        images[0].pixels = iconPixels;
+        glfwSetWindowIcon(Global::window, 1, images);
+        stbi_image_free(iconPixels);
+    }
+    else
+    {
+        std::cout << "Failed to load icon image\n";
+    }
+}

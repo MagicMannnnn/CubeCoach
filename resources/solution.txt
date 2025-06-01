@@ -1,12 +1,12 @@
-Scramble: U' R' D2 B' D L2 U' F2 L D F2 R' B U F2 L2 B2 L' U2 R'  y2 x2 
+Scramble: U2 L' F L' U B2 L2 F' L2 B L F' R' F L' D' B2 R U R  y2 x2 
 
 Solution: 
- U Dp L Rp Fp Dp B 
+ B2 R Bp D Rp D 
 
- Fp U F2 U Fp 
- U2 R2 B2 R2 B2 
- Fp Lp U2 L F 
- B Up Bp U B U Bp 
+ L B U Bp Lp 
+ U Rp U2 R Fp Up F 
+ B Up Bp Up F U Fp 
+ U B L U2 Lp U2 Bp 
  
-  Rp Up Fp U F R 
- U2 R Up R U R U R Up Rp Up R2 
+ Up L Fp Lp F Lp U L Up Lp Up L Up F U Fp 
+  Rp U2 R U2 Rp F R U Rp Up Rp Fp R2 U
