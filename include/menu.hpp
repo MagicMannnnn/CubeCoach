@@ -33,8 +33,8 @@ namespace UI {
 	class Menu {
 	public:
 		Menu()
-		: m_textRenderer(RESOURCES_PATH"font1.ttf", 12, RESOURCES_PATH"text.vert", RESOURCES_PATH"text.frag"),
-			m_shader(RESOURCES_PATH"rect.vert", RESOURCES_PATH"rect.frag")
+		: m_textRenderer(RESOURCES_PATH"fonts/font1.ttf", 12, RESOURCES_PATH"shaders/text.vert", RESOURCES_PATH"shaders/text.frag"),
+			m_shader(RESOURCES_PATH"shaders/rect.vert", RESOURCES_PATH"shaders/rect.frag")
 		   {
 			m_buttons.push_back(new Button(glm::vec2(Settings::SCR_WIDTH - 100 - 20, Settings::SCR_HEIGHT - 100), glm::vec2(80, 80) * 1.5f, RESOURCES_PATH"icons/menu.png", m_shader, GL_RGBA));
 			m_buttons.push_back(new Button(glm::vec2(Settings::SCR_WIDTH - 110 - 20, Settings::SCR_HEIGHT - 200), glm::vec2(80, 80) * 1.5f, RESOURCES_PATH"icons/scramble2.png", m_shader, GL_RGBA));

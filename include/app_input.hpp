@@ -9,7 +9,7 @@
 
 namespace Global {
     GLFWwindow* window;
-    Camera camera(glm::vec3(0.0f, 5.5f, 10.0f));
+    Camera camera(glm::vec3(0.0f, 5.f, 10.0f));
     float mouseX = Settings::SCR_WIDTH / 2.0f;
     float mouseY = Settings::SCR_HEIGHT / 2.0f;
     float mouseLastX = Settings::SCR_WIDTH / 2.0f;

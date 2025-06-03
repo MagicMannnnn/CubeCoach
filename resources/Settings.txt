@@ -1,5 +1,5 @@
 ***time in seconds for each move, set to zero for instant moves***
-MOVETIME=0.01
+MOVETIME=0.1
 
 ***background colour in RGB***
 BG_COLOUR = (50, 50, 50)
