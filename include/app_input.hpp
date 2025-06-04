@@ -9,7 +9,7 @@
 
 namespace Global {
     GLFWwindow* window;
-    Camera camera(glm::vec3(0.0f, 5.f, 10.0f));
+    Camera camera(glm::vec3(0.0f, 4.3f, 10.0f));
     float mouseX = Settings::SCR_WIDTH / 2.0f;
     float mouseY = Settings::SCR_HEIGHT / 2.0f;
     float mouseLastX = Settings::SCR_WIDTH / 2.0f;
@@ -21,6 +21,9 @@ namespace Global {
     bool leftClick = false;
     bool rightClick = false;
     bool firstLeftClick = true;
+
+    unsigned int codepoint;
+    bool typing = false;
 
     // Move flags
     bool U = false, Up = false, U2 = false;
@@ -44,8 +47,25 @@ namespace Global {
     bool nine = false;
     bool prevNine = false;
 
+    bool backspace = false;
+    bool prevBackspace = false;
+
 
     float deltaTime = 0.0f;
+
+
+    void resetInputs() {
+        U = false, Up = false, U2 = false;
+        D = false, Dp = false, D2 = false;
+        L = false, Lp = false, L2 = false;
+        R = false, Rp = false, R2 = false;
+        F = false, Fp = false, F2 = false;
+        B = false, Bp = false, B2 = false;
+        M = false, Mp = false, M2 = false;
+        UP = false, DOWN = false, LEFT = false, RIGHT = false;
+        solve = false, zero = false, nine = false;
+    }
+
 
     void processInput(GLFWwindow* window)
     {
@@ -64,6 +84,7 @@ namespace Global {
         solve = false;
         zero = false;
         nine = false;
+        backspace = false;
 
         struct MoveDef {
             int key;
@@ -92,7 +113,8 @@ namespace Global {
             {GLFW_KEY_UP, prevUP, UP},
             {GLFW_KEY_S, prevSolve, solve},
             {GLFW_KEY_0, prevZero, zero},
-            {GLFW_KEY_9, prevNine, nine}
+            {GLFW_KEY_9, prevNine, nine},
+            {GLFW_KEY_BACKSPACE, prevBackspace, backspace}
         };
 
         for (auto& m : moves) {
@@ -121,6 +143,14 @@ namespace Global {
 
 
     }
+
+
+    void characterCallback(GLFWwindow* window, unsigned int _codepoint) {
+        codepoint = _codepoint;
+        typing = true;
+        
+    }
+
 
     // glfw: whenever the window size changed (by OS or user resize) this callback function executes
     // ---------------------------------------------------------------------------------------------

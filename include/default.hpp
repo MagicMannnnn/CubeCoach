@@ -9,6 +9,7 @@
 #include <random.hpp>
 #include <menu.hpp>
 #include <cube_functions.hpp>
+#include <algorithm>
 
 
 
@@ -32,7 +33,8 @@ public:
 		m_cube(),
 		m_solvedCube(),
 		m_bitwiseCube(),
-		m_menu()
+		m_menu(),
+		m_currentMoveRenderer(RESOURCES_PATH"fonts/font1.ttf", 12, RESOURCES_PATH"shaders/text.vert", RESOURCES_PATH"shaders/text.frag")
 	{
 		m_menu.setPos(UI::TEXTS::CROSS, 20, Settings::SCR_HEIGHT / 2);
 		m_menu.setPos(UI::TEXTS::SCRAMBLE, Settings::SCR_WIDTH / 2 - 300, Settings::SCR_HEIGHT / 2 + 350);
@@ -55,7 +57,9 @@ public:
 
 	}
 
-
+	~Default() {
+		m_steppingMoves.clear();
+	}
 
 	void run() {
 
@@ -125,6 +129,10 @@ public:
 
 			m_menu.draw();
 
+			if (m_stepping) {
+				m_currentMoveRenderer.RenderText(m_currentMoveText, Settings::SCR_WIDTH / 2 - 7, 75, 1, glm::vec3(1, 1, 1));
+			}
+
 			glfwSwapBuffers(m_window);
 			glfwPollEvents();
 
@@ -150,27 +158,40 @@ private:
 			m_menu.setButtonClicked(UI::SOLVE, false);
 			solve();
 		}
-		else if (m_menu.getButtonClicked(UI::OPENTXT)) {
-			m_menu.setButtonClicked(UI::OPENTXT, false);
-			m_solver.openInNotepad();
-		}
-		else if (m_menu.getButtonClicked(UI::OPENSETTINGS)) {
-			m_menu.setButtonClicked(UI::OPENSETTINGS, false);
-			Settings::openInNotepad();
-		}
-		else if (m_menu.getButtonClicked(UI::LOADSETTINGS)) {
-			m_menu.setButtonClicked(UI::LOADSETTINGS, false);
-			updateSettings();
-		}
 		else if (m_menu.getButtonClicked(UI::RESETSETTINGS)) {
 			m_menu.setButtonClicked(UI::RESETSETTINGS, false);
 			Settings::resetSettings();
+			Settings::MOVE_TIME = 0.1;
+			m_menu.setText(UI::TURNSPEED, "10");
+			m_menu.setText(UI::SCRAMBLELENGTH, "20");
+			m_scrambleLength = 20;
+			m_solvedCube.rotationTime = Settings::MOVE_TIME;
+			m_cube.rotationTime = Settings::MOVE_TIME;
 		}
-		else if (m_menu.getButtonClicked(UI::CONTROLS)) {
-			m_menu.setButtonClicked(UI::CONTROLS, false);
-			Settings::openControlsInNotepad();
-		}
+	
 
+
+		if (Global::typing) {
+			bool typed = m_menu.handleCharacterInput(Global::codepoint);
+			Global::typing = false;
+			if (typed) {
+				Global::processInput(m_window);
+
+
+				updateMenu();
+
+				return;
+			}
+		}
+		if (Global::backspace) {
+			m_menu.backspacePressed();
+			Global::processInput(m_window);
+
+			updateMenu();
+
+
+			return;
+		}
 
 
 
@@ -188,11 +209,13 @@ private:
 			Global::firstLeftClick = true;  // Reset for next drag
 		}
 
-		VisualCubeMoves();
+		
 
 		if (Global::rightClick) {
 			m_cube.resetOrientation();
 		}
+
+		VisualCubeMoves();
 
 		m_cube.update(Global::deltaTime);
 		m_solvedCube.update(Global::deltaTime);
@@ -202,12 +225,68 @@ private:
 		Global::mouseDeltaX = 0;
 		Global::mouseDeltaY = 0;
 
+		if (m_stepping) {
+			if (Global::LEFT) {
+
+				if (m_stepPointer == 0) return;
+				
+				m_stepPointer--;
+
+				std::string move = invertMove(m_steppingMoves[m_stepPointer]);
+				m_currentMoveText = move;
+				if (m_currentMoveText.back() == 'p') {
+					m_currentMoveText.pop_back();
+					m_currentMoveText += "'";
+				}
+				m_bitwiseCube.applyMove(move);
+				m_cube.applyMove(move);
+				
+			}
+			else if (Global::RIGHT) {
+
+				if (m_stepPointer == m_steppingMoves.size()) {
+					m_solving = false;
+					m_stepping = false;
+					return;
+				}
+
+				m_currentMoveText = m_steppingMoves[m_stepPointer];
+				if (m_currentMoveText.back() == 'p') {
+					m_currentMoveText.pop_back();
+					m_currentMoveText += "'";
+				}
+				m_bitwiseCube.applyMove(m_steppingMoves[m_stepPointer]);
+				m_cube.applyMove(m_steppingMoves[m_stepPointer]);
+				m_stepPointer++;
+			}
+
+			return;
+		}
+
+
 		if (m_bitwiseCube.isSolved()) {
 			m_solving = false;
 		}
 
+		
+
+	}
 
 
+	void updateMenu() {
+		float tps = m_menu.getTextboxInput(UI::TURNSPEED);
+		tps = tps == -1 ? 10 : tps; //if bad input, set to 10
+		tps = std::min(tps, 1000.f);
+		if (tps == 1000) m_menu.setText(UI::TURNSPEED, "1000");
+		Settings::MOVE_TIME = 1.f / tps;
+		m_solvedCube.rotationTime = Settings::MOVE_TIME;
+		m_cube.rotationTime = Settings::MOVE_TIME;
+
+		int length = m_menu.getTextboxInput(UI::SCRAMBLELENGTH);
+		length = length == -1 ? 20 : length;
+		length = std::min(length, 100);
+		if (length == 100) m_menu.setText(UI::SCRAMBLELENGTH, "100");
+		m_scrambleLength = length;
 	}
 
 	void solve() {
@@ -220,9 +299,48 @@ private:
 			if (c == 'p') c = '\'';
 		}
 		m_menu.setText(UI::TEXTS::CROSS, solution);
-		m_bitwiseCube.applyMoves(m_solver.getSolution());
-		m_cube.applyMoves(m_solver.getSolution());
+
+		if (m_menu.getButtonClicked(UI::ARROWS)) {
+			m_stepping = true;
+			m_stepPointer = 0;
+			createSteppingVector();
+		}
+		else {
+			m_bitwiseCube.applyMoves(m_solver.getSolution());
+			m_cube.applyMoves(m_solver.getSolution());
+		}
+
+		
 	}
+
+	std::string invertMove(const std::string& move) {
+		if (move.back() == 'p') return move.substr(0, move.size() - 1); // e.g. "Fp" -> "F"
+		if (move.back() == '2') return move;                            // "F2" stays "F2"
+		return move + "p";                                              // "F" -> "Fp"
+	}
+
+
+	void createSteppingVector() {
+		m_steppingMoves.clear();
+		std::array<std::string, 18> moves = { "U", "Up", "U2", "D", "Dp", "D2", "L", "Lp", "L2", "R", "Rp", "R2", "F", "Fp", "F2", "B", "Bp", "B2" };
+		std::string currentMove = "";
+		for (char c : m_solver.getSolution()) {
+			if (c == ' ') {
+				auto it = std::find(moves.begin(), moves.end(), currentMove);
+				if (it != moves.end()) m_steppingMoves.push_back(currentMove);
+				currentMove = "";
+			}
+			else {
+				currentMove += c;
+			}
+
+		}
+		auto it = std::find(moves.begin(), moves.end(), currentMove);
+		if (it != moves.end()) m_steppingMoves.push_back(currentMove);
+	}
+
+	
+
 
 	void VisualCubeMoves() {
 
@@ -236,13 +354,17 @@ private:
 			m_cube = m_solvedCube;
 			m_scramble = "Scramble: ";
 			applyScrambleText();
+			m_stepping = false;
+		}
+
+		if (Global::zero) {
+			ScrambleCube();
+			m_stepping = false;
 		}
 
 
 
-
-
-		if (m_scramble.size() > 400) return;
+		if (m_stepping) return;
 
 		// Handle U moves
 		if (Global::U) { m_cube.U(); m_bitwiseCube.U(); addToScramble("U"); /*m_bitwiseCube.displayHex();*/ }
@@ -250,7 +372,7 @@ private:
 		if (Global::U2) { m_cube.U2(); m_bitwiseCube.U2(); addToScramble("U2"); /*m_bitwiseCube.displayHex();*/ }
 
 		// Handle D moves
-		if (Global::D) { m_cube.D(); m_bitwiseCube.D(); addToScramble("D"); m_bitwiseCube.test();/*m_bitwiseCube.displayHex();*/ }
+		if (Global::D) { m_cube.D(); m_bitwiseCube.D(); addToScramble("D"); /*m_bitwiseCube.displayHex();*/ }
 		if (Global::Dp) { m_cube.Dp(); m_bitwiseCube.Dp(); addToScramble("D'"); /*m_bitwiseCube.displayHex();*/ }
 		if (Global::D2) { m_cube.D2(); m_bitwiseCube.D2(); addToScramble("D2"); /*m_bitwiseCube.displayHex();*/ }
 
@@ -287,19 +409,15 @@ private:
 
 
 
-		if (Global::zero) {
-			ScrambleCube();
-		}
-
 
 
 	}
 
 
 	
-	void ScrambleCube(int length = 20) {
+	void ScrambleCube() {
 
-		m_scramble = CubeFunctions::scramble(m_cube, m_solvedCube, m_bitwiseCube, length);
+		m_scramble = CubeFunctions::scramble(m_cube, m_solvedCube, m_bitwiseCube, m_scrambleLength);
 		
 		applyScrambleText();
 
@@ -370,4 +488,11 @@ private:
 	std::string m_scramble = "Scramble: ";
 	bool m_solving = false;
 	bool m_autoRotateAfterScramble = true;
+	int m_scrambleLength = 20;
+
+	bool m_stepping = false;
+	int m_stepPointer = 0;
+	std::vector<std::string> m_steppingMoves;
+	TextRenderer m_currentMoveRenderer;
+	std::string m_currentMoveText;
 };

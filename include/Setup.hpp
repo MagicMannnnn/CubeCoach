@@ -30,6 +30,7 @@ namespace Setup {
         glfwSetCursorPosCallback(Global::window, Global::mouse_callback);
         glfwSetScrollCallback(Global::window, Global::scroll_callback);
         glfwSetMouseButtonCallback(Global::window, Global::mouse_button_callback);
+        glfwSetCharCallback(Global::window, Global::characterCallback);
 
         setupIcon();
 
