@@ -1,0 +1,12 @@
+Scramble: U' F2 R' B2 R2 F' R' F2 D' R' U2 B' D' B2 R B' D R2 B' D y2 x2 
+
+Solution: 
+ U L F2 R2 Dp Bp R 
+
+ R U2 B2 Rp B2 
+ Up Rp F2 R F2 
+ Rp U R Up R U Rp 
+ B U2 Bp Rp Up R 
+ 
+ U2 R U2 Rp Up R Up Rp F R U Rp Up Fp 
+ U Rp Bp R Up R D Rp U R Dp R2 B R 

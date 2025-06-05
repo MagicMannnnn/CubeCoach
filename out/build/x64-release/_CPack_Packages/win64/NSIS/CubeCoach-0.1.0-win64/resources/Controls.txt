@@ -1,0 +1,15 @@
+***No functionality to change keybinds at this stage***
+
+Solve - s
+Scramble - 0
+Reset Cube = 9
+
+U - u
+D - d
+F - f
+B - b
+R - r
+L - l
+
+prime - left shift (hold)
+double - left ctrl (hold)
